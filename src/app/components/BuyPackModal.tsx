@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Pack } from "./types";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { projectId, publicAnonKey } from "@/utils/supabase/info";
 
 interface BuyPackModalProps {
   pack: Pack;
@@ -30,6 +30,7 @@ export function BuyPackModal({ pack, onClose, onSuccess }: BuyPackModalProps) {
             Authorization: `Bearer ${publicAnonKey}`,
           },
           body: JSON.stringify({ username: username.trim(), packPrice: pack.price }),
+          mode: "cors",
         }
       );
       const data = await res.json();
