@@ -9,7 +9,7 @@ import { HowToPlayPage } from "./components/HowToPlayPage";
 import { CardDisplay } from "./components/CardDisplay";
 import { PACKS, ALL_CARDS, rollCards } from "./components/cardData";
 import type { Pack, Card, AlbumEntry } from "./components/types";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { projectId, publicAnonKey } from "@/utils/supabase/info";
 
 type Page = "home" | "album" | "how-to-play";
 
