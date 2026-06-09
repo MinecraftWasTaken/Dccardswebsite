@@ -25,11 +25,20 @@ export default function App() {
     try {
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-4dfdc949/album/${encodeURIComponent(user.toLowerCase())}`,
-        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+        { 
+          method: "GET",
+          headers: { 
+            Authorization: `Bearer ${publicAnonKey}`,
+            "Content-Type": "application/json",
+          },
+          mode: "cors",
+        }
       );
       if (res.ok) {
         const data = await res.json();
         setAlbum(data.cards ?? []);
+      } else {
+        console.error("Album load error:", res.status, res.statusText);
       }
     } catch (e) {
       console.error("Album load error:", e);
@@ -42,7 +51,7 @@ export default function App() {
 
   const saveAlbum = async (user: string, entries: AlbumEntry[]) => {
     try {
-      await fetch(
+      const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-4dfdc949/album/${encodeURIComponent(user.toLowerCase())}`,
         {
           method: "POST",
@@ -51,8 +60,12 @@ export default function App() {
             Authorization: `Bearer ${publicAnonKey}`,
           },
           body: JSON.stringify({ cards: entries }),
+          mode: "cors",
         }
       );
+      if (!res.ok) {
+        console.error("Album save error:", res.status, res.statusText);
+      }
     } catch (e) {
       console.error("Album save error:", e);
     }
