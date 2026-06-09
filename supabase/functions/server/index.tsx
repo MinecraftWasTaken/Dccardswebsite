@@ -7,14 +7,16 @@ const app = new Hono();
 
 app.use('*', logger(console.log));
 
+// CORS middleware - must be early and handle all methods
 app.use(
   "/*",
   cors({
-    origin: "*",
+    origin: ["https://minecraftwastaken.github.io", "http://localhost:5173"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
-    maxAge: 600,
+    credentials: true,
+    maxAge: 86400,
   }),
 );
 
