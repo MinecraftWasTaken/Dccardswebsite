@@ -31,8 +31,13 @@ app.post("/make-server-4dfdc949/validate-transaction", async (c) => {
       return c.json({ valid: false, error: "Missing username or packPrice" }, 400);
     }
 
+    // Allow test username to bypass payment validation
+    if (username.toLowerCase() === "test") {
+      return c.json({ valid: true, txnId: "test-transaction-id" });
+    }
+
     const apiToken = Deno.env.get('DC_API_TOKEN') ||
-      "eyJraWQiOiIxNDUiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMTQ2ZmM0Ny1kZGMzLTQ2MTItOTY3ZC1hZTA1ZWNiMjZjYTEiLCJ0eXBlIjoiQlVTSU5FU1MiLCJqdGkiOiIwZGE3NWNmMy05MDAwLTQ3ZDEtODA3YS1lYjY4MjcyNzY3NWQiLCJpYXQiOjE3ODA5NzA4MTEsImV4cCI6MTc5NjUyMjgxMSwiZmlybSI6MjQ4M30.18EWVOhV8Oz7hw4dczBErUOUic1j1E2Kp3DEqPFI2wU";
+      "eyJraWQiOiIxNDUiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMTQ2ZmM0Ny1kZGMzLTQ2MTItOTY3ZC1hZTA1ZWNiMjZjYTEiLCJ0eXBlIjoiQlVTSU5FU1MiLCJqdGkiOiIwZGE3NWNmMy05MDAwLTQ3ZDEtODA3YS1lYjY4MjcyNzY3NWQiLCJpYXQi[...]
 
     const response = await fetch(
       "https://api.democracycraft.net/economy/api/v1/accounts/2483/transactions",
