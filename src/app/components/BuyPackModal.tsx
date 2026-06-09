@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Pack } from "./types";
-import { projectId, publicAnonKey } from "@/utils/supabase/info";
 
 interface BuyPackModalProps {
   pack: Pack;
@@ -21,24 +20,56 @@ export function BuyPackModal({ pack, onClose, onSuccess }: BuyPackModalProps) {
     setLoading(true);
     setError("");
     try {
+      // Fetch transactions directly from DemocracyCraft API
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-4dfdc949/validate-transaction`,
+        "https://api.democracycraft.net/economy/api/v1/accounts/2483/transactions",
         {
-          method: "POST",
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${publicAnonKey}`,
           },
-          body: JSON.stringify({ username: username.trim(), packPrice: pack.price }),
           mode: "cors",
         }
       );
-      const data = await res.json();
-      if (data.valid) {
-        onSuccess(username.trim());
-      } else {
-        setError(data.error || "Payment not found. Please try again.");
+
+      if (!res.ok) {
+        setError(`API Error: ${res.status} ${res.statusText}`);
+        setLoading(false);
+        return;
       }
+
+      const data = await res.json();
+      const items = data?.items ?? [];
+
+      const now = Date.now();
+      const fiveMinutesMs = 5 * 60 * 1000;
+
+      // Parse each transaction
+      for (const item of items) {
+        const amount = parseFloat(item.amount ?? "0");
+        const message = String(item.message ?? "");
+        const settledAt = item.settledAt ? new Date(item.settledAt).getTime() : 0;
+
+        // Only consider transactions within the last 5 minutes
+        if (now - settledAt > fiveMinutesMs) continue;
+
+        // Parse "Business payment: SenderName -> ReceiverName"
+        const match = message.match(/Business payment:\s*(\S+)\s*->\s*(\S+)/i);
+        if (!match) continue;
+
+        const fromPlayerName = match[1];
+
+        if (
+          fromPlayerName.toLowerCase() === username.toLowerCase() &&
+          Math.abs(amount - pack.price) < 0.01
+        ) {
+          onSuccess(username.trim());
+          setLoading(false);
+          return;
+        }
+      }
+
+      setError("No matching payment found in the last 5 minutes. Make sure you paid the correct amount and try again.");
     } catch (e) {
       setError(`Connection error: ${e}`);
     } finally {
